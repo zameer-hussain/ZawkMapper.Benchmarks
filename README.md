@@ -1,137 +1,261 @@
 <p align="center">
-  <img src="assets/zawktech-logo.png" alt="ZawkTech Logo" width="420" />
+  <img src="assets/zawktech-logo.png" alt="ZawkTech Logo" width="180" />
 </p>
 
 <p align="center">
-  <img src="assets/zawkmapper-logo.png" alt="ZawkMapper Logo" width="520" />
+  <img src="assets/zawkmapper-logo.png" alt="ZawkMapper Logo" width="220" />
 </p>
 
-# ZawkMapper Benchmark Comparison
+# ZawkMapper.Benchmarks
 
-**ZawkMapper** is a free .NET object mapper and EF Core projection library by **ZawkTech**. This benchmark compares runtime DTO mapping and SQL-friendly `IQueryable` projection across Manual Mapping, AutoMapper, and ZawkMapper `0.6.1-rc.1`.
+![ZawkMapper Benchmark Preview](assets/zawkmapper-benchmark-preview.png)
 
-This repository is meant to keep the comparison open. Developers can run the same benchmark, inspect the scenarios, and share feedback for future performance improvements.
+**ZawkMapper.Benchmarks** is a public benchmark project comparing **ZawkMapper**, **AutoMapper**, and **Manual Mapping** across real .NET mapping scenarios.
 
-## Package and links
+This repository focuses on practical performance testing for:
 
-| Resource | Link |
-|---|---|
-| NuGet package | https://www.nuget.org/packages/ZawkMapper/0.6.1-rc.1 |
-| NuGet package page | https://www.nuget.org/packages/ZawkMapper |
-| ZawkTech website | https://www.zawktech.com |
-| ZawkMapper product page | https://www.zawktech.com/zawkmapper |
-| Founder LinkedIn | https://www.linkedin.com/in/zameer-vighio/ |
-| ZawkTech LinkedIn | https://www.linkedin.com/company/zawktech |
-| GitHub | https://github.com/zameer-hussain/ZawkMapper |
+- .NET object mapping
+- C# DTO mapping
+- AutoMapper alternative comparison
+- runtime object mapping
+- nested object mapping
+- collection mapping
+- EF Core IQueryable projection
+- `ProjectAs` vs `ProjectTo` vs manual `Select`
+- time, memory, per-record cost, and checksum validation
 
-> If the ZawkTech LinkedIn page slug changes, update the URL before publishing.
+ZawkMapper is developed by **ZawkTech** as a free .NET object mapper with simple APIs, honest benchmarks, and continuous performance improvement.
 
-## Why these results should include laptop specs
+---
 
-Benchmark numbers depend on CPU, RAM, disk, operating system, .NET SDK, background processes, and database state. For public comparison, machine details should be shown with the result.
+## Quick links
 
-Fill this section before publishing the benchmark publicly:
+- NuGet package: https://www.nuget.org/packages/ZawkMapper/
+- ZawkTech website: https://www.zawktech.com
+- ZawkTech LinkedIn: https://www.linkedin.com/company/zawktech
+- Developer LinkedIn: https://www.linkedin.com/in/zameer-vighio/
+- Main ZawkMapper repo: https://github.com/zameer-hussain/ZawkMapper
+- Benchmark repo: https://github.com/zameer-hussain/ZawkMapper.Benchmarks
+
+---
+
+## Latest tested package
+
+```xml
+<PackageReference Include="ZawkMapper" Version="0.6.1-rc.1" />
+```
+
+The benchmark below was run using the published NuGet package, not a local DLL reference.
+
+---
+
+## Benchmark environment
+
+Benchmark results depend on CPU, RAM, storage speed, .NET SDK/runtime version, operating system, database provider, and background workload. These numbers should be read as one transparent test environment, not a universal guarantee.
 
 | Item | Value |
 |---|---|
-| Machine | Local Windows laptop |
-| CPU | `add CPU model here` |
-| RAM | `add RAM here` |
-| Storage | `add SSD/NVMe/HDD here` |
-| OS | `add Windows version here` |
-| .NET SDK | `dotnet --info` |
+| Device | HP Pavilion Laptop 15t-eg000 |
+| Operating system | Windows 11 Pro |
+| Windows version | 25H2 |
+| OS build | 26200.8457 |
+| Processor | 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz |
+| RAM | 16.0 GB, 15.8 GB usable |
+| System type | 64-bit operating system, x64-based processor |
+| Graphics | Intel(R) Iris(R) Xe Graphics |
+| Storage | 954 GB |
+| Database | SQLite local file |
 | Build mode | Release |
-| Package tested | ZawkMapper `0.6.1-rc.1` from NuGet |
+| Runtime data size | 100,000 customers and 50,000 orders |
 
-## Benchmark command
+---
 
-```cmd
-for /d /r %i in (bin,obj) do @if exist "%i" rmdir /s /q "%i"
+## How to run
+
+From the benchmark repository root:
+
+```bash
 dotnet restore
 dotnet build -c Release
-dotnet run --project .\src\ZawkMapper.Benchmarks\ZawkMapper.Benchmarks.csproj -- compare --take 100000
+dotnet run --project ./src/ZawkMapper.Benchmarks/ZawkMapper.Benchmarks.csproj -- compare --take 100000
 ```
 
-## Scenario setup
+The benchmark generates console output and report files under the `results` folder.
 
-The benchmark separates runtime object mapping from EF Core projection.
+---
 
-| Scenario | Records | What it checks |
-|---|---:|---|
-| Runtime flat customer DTO | 100,000 customers | simple DTO mapping for flat fields |
-| Runtime order summary DTO | 50,000 orders | summary DTO with computed fields |
-| Runtime nested order detail DTO | 50,000 orders | nested object and collection mapping |
-| Runtime cumulative | mixed | combined runtime workload |
-| EF projection flat customer DTO | 100,000 customers | `IQueryable` projection with flat fields |
-| EF projection order summary DTO | 50,000 orders | SQL-friendly projection for summary data |
-| EF projection nested order detail DTO | 10,000 projected rows | nested projection shape |
+## What is compared
 
-The benchmark writes checksum values for each mapper so the result is not only fast, but also mapped correctly.
+### Runtime mapping
 
-## Latest published-package result
+Runtime mapping compares in-memory object mapping:
 
-These numbers were measured using the published NuGet package `ZawkMapper 0.6.1-rc.1`.
+- Manual Mapping
+- AutoMapper
+- ZawkMapper `MapField`
+- ZawkMapper `MapFieldDirect`
+- ZawkMapper `MapFieldStrict`
+- ZawkMapper Mixed configuration
 
-### Runtime mapping, elapsed time
+### EF Core projection
 
-Lower is better.
+Projection compares queryable database projection:
 
-| Scenario | Manual Mapping | AutoMapper | ZawkMapper Mixed | ZawkMapper best variant in this run |
-|---|---:|---:|---:|---:|
-| Flat customer DTO | 20.320 ms | 37.250 ms | 46.576 ms | 40.501 ms (`MapFieldStrict`) |
-| Order summary DTO | 26.822 ms | 61.011 ms | 51.815 ms | 48.853 ms (`MapFieldStrict`) |
-| Nested order detail DTO | 39.419 ms | 66.760 ms | 109.328 ms | 109.328 ms (`Mixed`) |
-| Cumulative runtime | 91.171 ms | 168.771 ms | 203.371 ms | 197.542 ms (`MapField`) |
+- Manual `Select`
+- AutoMapper `ProjectTo`
+- ZawkMapper `ProjectAs`
 
-### Runtime mapping, allocated memory
+### ZawkMapper runtime variants
 
-Lower is better.
-
-| Scenario | Manual Mapping | AutoMapper | ZawkMapper Mixed |
-|---|---:|---:|---:|
-| Flat customer DTO | 11.37 MB | 16.19 MB | 14.91 MB |
-| Order summary DTO | 7.59 MB | 13.10 MB | 12.43 MB |
-| Nested order detail DTO | 18.27 MB | 24.60 MB | 40.31 MB |
-| Cumulative runtime | 37.23 MB | 53.59 MB | 67.53 MB |
-
-### EF Core projection, elapsed time
-
-Lower is better.
-
-| Scenario | Manual Select | AutoMapper ProjectTo | ZawkMapper ProjectAs |
-|---|---:|---:|---:|
-| Flat customer DTO | 261.951 ms | 261.637 ms | 251.886 ms |
-| Order summary DTO | 255.560 ms | 211.251 ms | 205.980 ms |
-| Nested order detail DTO | 383.717 ms | 378.790 ms | 379.275 ms |
-
-## What the result means
-
-ZawkMapper `0.6.1-rc.1` shows strong progress in runtime mapping and remains very competitive in EF Core projection.
-
-- `ProjectAs` is strong for SQL-friendly projection scenarios.
-- Runtime summary mapping beats AutoMapper in this benchmark run.
-- Runtime flat mapping has lower allocation than AutoMapper, with close timing.
-- Runtime nested collection mapping is the next area for focused optimization.
-
-## ZawkMapper runtime variants
-
-| Variant | Best use |
+| Variant | Meaning |
 |---|---|
-| `MapFieldStrict` | same-type source and destination members where compile-time type safety is desired |
-| `MapFieldDirect` | direct assignment style where the developer wants no conversion responsibility |
-| `MapField` | conversion, computed fields, nested object mapping, and collection bridges |
-| `Mixed` | realistic application style with direct/simple fields plus flexible computed/nested fields |
+| `MapField` | Flexible mapping, useful for conversions, computed values, nested objects, and collection bridges |
+| `MapFieldDirect` | Direct assignment where valid |
+| `MapFieldStrict` | Strict same-type member mapping where valid |
+| `Mixed` | Practical real-world style using direct/simple mappings plus flexible mappings for computed or nested cases |
 
-Example:
+---
+
+## Result summary
+
+### Runtime flat customer DTO
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| Manual Mapping | 20.320 ms | 11.37 MB | 0.203 µs | 119.20 B |
+| AutoMapper | 37.250 ms | 16.19 MB | 0.372 µs | 169.76 B |
+| ZawkMapper MapFieldStrict | 40.501 ms | 14.91 MB | 0.405 µs | 156.34 B |
+| ZawkMapper MapField | 43.808 ms | 14.92 MB | 0.438 µs | 156.42 B |
+| ZawkMapper Mixed | 46.576 ms | 14.91 MB | 0.466 µs | 156.34 B |
+| ZawkMapper MapFieldDirect | 52.584 ms | 14.91 MB | 0.526 µs | 156.34 B |
+
+**Observation:** Manual mapping is fastest. ZawkMapper uses less memory than AutoMapper in this flat runtime scenario, while runtime speed remains close enough for practical evaluation.
+
+---
+
+### Runtime order summary DTO
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| Manual Mapping | 26.822 ms | 7.59 MB | 0.536 µs | 159.22 B |
+| ZawkMapper MapFieldStrict | 48.853 ms | 12.43 MB | 0.977 µs | 260.71 B |
+| ZawkMapper Mixed | 51.815 ms | 12.43 MB | 1.036 µs | 260.71 B |
+| ZawkMapper MapFieldDirect | 54.326 ms | 12.43 MB | 1.087 µs | 260.71 B |
+| AutoMapper | 61.011 ms | 13.10 MB | 1.220 µs | 274.80 B |
+| ZawkMapper MapField | 70.769 ms | 12.43 MB | 1.415 µs | 260.78 B |
+
+**Observation:** ZawkMapper is faster than AutoMapper in this runtime summary DTO scenario and also allocates slightly less memory.
+
+---
+
+### Runtime nested order detail DTO
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| Manual Mapping | 39.419 ms | 18.27 MB | 0.788 µs | 383.22 B |
+| AutoMapper | 66.760 ms | 24.60 MB | 1.335 µs | 515.81 B |
+| ZawkMapper Mixed | 109.328 ms | 40.31 MB | 2.187 µs | 845.44 B |
+| ZawkMapper MapFieldStrict | 110.087 ms | 40.31 MB | 2.202 µs | 845.44 B |
+| ZawkMapper MapFieldDirect | 121.625 ms | 40.31 MB | 2.433 µs | 845.44 B |
+| ZawkMapper MapField | 123.128 ms | 40.33 MB | 2.463 µs | 845.82 B |
+
+**Observation:** Nested runtime collection mapping is the main area where ZawkMapper still needs future optimization. The result is published honestly so the improvement path remains visible.
+
+---
+
+### Runtime cumulative flat + summary + nested
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| Manual Mapping | 91.171 ms | 37.23 MB | 0.456 µs | 195.20 B |
+| AutoMapper | 168.771 ms | 53.59 MB | 0.844 µs | 280.98 B |
+| ZawkMapper MapField | 197.542 ms | 67.53 MB | 0.988 µs | 354.04 B |
+| ZawkMapper MapFieldDirect | 200.584 ms | 67.53 MB | 1.003 µs | 354.04 B |
+| ZawkMapper Mixed | 203.371 ms | 67.53 MB | 1.017 µs | 354.04 B |
+| ZawkMapper MapFieldStrict | 208.223 ms | 67.53 MB | 1.041 µs | 354.04 B |
+
+**Observation:** Manual mapping remains the best raw baseline. ZawkMapper is competitive in simpler runtime scenarios and still has a clear future target in nested collection runtime mapping.
+
+---
+
+## EF Core projection results
+
+### Projection flat customer DTO
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| ZawkMapper ProjectAs | 251.886 ms | 32.98 MB | 2.519 µs | 345.82 B |
+| AutoMapper ProjectTo | 261.637 ms | 32.97 MB | 2.616 µs | 345.75 B |
+| Manual Select | 261.951 ms | 32.98 MB | 2.620 µs | 345.80 B |
+
+### Projection order summary DTO
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| ZawkMapper ProjectAs | 205.980 ms | 14.59 MB | 4.120 µs | 306.02 B |
+| AutoMapper ProjectTo | 211.251 ms | 14.58 MB | 4.225 µs | 305.81 B |
+| Manual Select | 255.560 ms | 14.97 MB | 5.111 µs | 314.04 B |
+
+### Projection nested order detail DTO
+
+| Mapper | Time | Memory | Per record | Bytes/record |
+|---|---:|---:|---:|---:|
+| AutoMapper ProjectTo | 378.790 ms | 18.49 MB | 37.879 µs | 1938.86 B |
+| ZawkMapper ProjectAs | 379.275 ms | 18.54 MB | 37.928 µs | 1943.81 B |
+| Manual Select | 383.717 ms | 18.50 MB | 38.372 µs | 1939.99 B |
+
+**Projection observation:** ZawkMapper `ProjectAs` is strong in EF Core IQueryable projection scenarios and remains close to AutoMapper `ProjectTo` and manual `Select`.
+
+---
+
+## How to read these results
+
+This benchmark is designed to be transparent, not exaggerated.
+
+- Manual mapping is usually the fastest raw baseline.
+- AutoMapper is a mature and widely used mapper.
+- ZawkMapper is a newer free mapper by ZawkTech and is improving release by release.
+- `ProjectAs` projection is already strong in these EF Core scenarios.
+- Runtime flat and summary DTO mappings are promising.
+- Nested runtime collection mapping is the next major optimization target.
+
+---
+
+## ZawkMapper usage example
 
 ```csharp
-cfg.MapModel<Customer, CustomerDto>()
-   .MapFieldStrict(d => d.Id, s => s.Id)
-   .MapFieldStrict(d => d.Name, s => s.Name)
-   .MapField(d => d.DisplayName, s => s.FirstName + " " + s.LastName);
+using ZawkMapper.Configuration;
+
+var config = new MapperConfiguration(cfg =>
+{
+    cfg.MapModel<Customer, CustomerDto>()
+       .MapFieldStrict(d => d.Id, s => s.Id)
+       .MapFieldStrict(d => d.Name, s => s.Name)
+       .MapField(d => d.DisplayName, s => s.FirstName + " " + s.LastName);
+});
 ```
 
-For nested collection bridges, use `MapField` on the parent and define a child map:
+For EF Core projection:
+
+```csharp
+using ZawkMapper.Extensions;
+
+var customers = await db.Customers
+    .ProjectAs<CustomerDto>(mapperConfig)
+    .ToListAsync();
+```
+
+---
+
+## Recommended guidance
+
+Use `MapFieldStrict` when the source and destination member types are the same.
+
+Use `MapFieldDirect` when direct assignment is valid and you want direct-style mapping.
+
+Use `MapField` for computed values, runtime conversion, nested object mapping, and collection bridge scenarios.
+
+Example:
 
 ```csharp
 cfg.MapModel<Order, OrderDetailDto>()
@@ -139,16 +263,34 @@ cfg.MapModel<Order, OrderDetailDto>()
 
 cfg.MapModel<OrderItem, OrderLineDto>()
    .MapFieldStrict(d => d.ProductName, s => s.ProductName)
-   .MapFieldStrict(d => d.Quantity, s => s.Quantity)
-   .MapFieldStrict(d => d.UnitPrice, s => s.UnitPrice);
+   .MapFieldStrict(d => d.Quantity, s => s.Quantity);
 ```
 
-## Professional benchmark note
+`MapFieldStrict` is not suitable for the parent collection bridge when source and destination collection item types differ, such as `List<OrderItem>` to `List<OrderLineDto>`.
 
-This benchmark is not a claim that one mapper wins in every application. It is a transparent comparison for these specific DTO and projection scenarios. Real results can change with data shape, hardware, .NET version, database provider, mapping rules, and application architecture.
+---
 
-## ZawkTech commitment
+## Project goals
 
-ZawkMapper is a ZawkTech developer tool. The current public package line is planned to remain free for the developer community while performance, documentation, and real-world mapping scenarios continue to improve.
+ZawkMapper is built by ZawkTech to provide a clean, simple, and free .NET object mapping experience.
 
-Useful SEO keywords: .NET object mapper, C# object mapper, DTO mapping, AutoMapper alternative, EF Core projection, IQueryable projection, runtime mapping, nested object mapping, collection mapping, MapModel, ProjectModel, ProjectAs, MapFieldStrict, MapFieldDirect, ZawkMapper, ZawkTech.
+The goal is to keep improving:
+
+- runtime object mapping
+- DTO mapping
+- nested mapping
+- collection mapping
+- EF Core projection
+- SQL-friendly IQueryable projection
+- developer-friendly API design
+- transparent benchmark reporting
+
+**Free mapper. Simple API. Real benchmarks. Built by ZawkTech.**
+
+---
+
+## License
+
+This benchmark project is provided for public review and testing.
+
+ZawkMapper package licensing is available on NuGet and in the main ZawkMapper repository.
