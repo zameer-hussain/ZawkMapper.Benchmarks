@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/zawktech-logo.png" alt="ZawkTech Logo" width="180" />
+  <img src="assets/zawktech.dark.logo.png" alt="ZawkTech Logo" width="180" />
 </p>
 
 <p align="center">
